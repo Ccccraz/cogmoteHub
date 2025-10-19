@@ -1,16 +1,17 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
+	"cogmoteHub/internal/db"
+	"cogmoteHub/internal/logger"
+	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
-
-
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -24,7 +25,9 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		Serve()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -48,4 +51,39 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+func Serve() {
+	logger.Init()
 
+	host := os.Getenv("POSTGRES_SERVER")
+	if host == "" {
+		host = "localhost"
+	}
+
+	user := os.Getenv("POSTGRES_USER")
+	dbName := os.Getenv("POSTGRES_USER")
+	password := loadSecret("POSTGRES_PASSWORD", "POSTGRES_PASSWORD_FILE")
+	if password == "" {
+		slog.Warn("database password not provided")
+	}
+
+	db.Init(host, user, password, dbName)
+}
+
+func loadSecret(envKey, fileKey string) string {
+	if value := os.Getenv(envKey); value != "" {
+		return value
+	}
+
+	filePath := os.Getenv(fileKey)
+	if filePath == "" {
+		return ""
+	}
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		slog.Error("unable to read secret file", "error", err, "path", filePath)
+		return ""
+	}
+
+	return strings.TrimSpace(string(data))
+}
