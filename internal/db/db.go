@@ -1,6 +1,7 @@
 package db
 
 import (
+	"cogmoteHub/internal/models"
 	"fmt"
 	"log/slog"
 	"sync"
@@ -34,6 +35,15 @@ func Init(host, user, password, dbName string) *gorm.DB {
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err != nil {
 			slog.Error("failed to connect to database", "error", err)
+			return
+		}
+
+		err = db.AutoMigrate(
+			&models.Device{},
+			&models.Animal{},
+		)
+		if err != nil {
+			slog.Error("failed to auto-migrate database", "error", err)
 			return
 		}
 
