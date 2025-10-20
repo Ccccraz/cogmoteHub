@@ -22,14 +22,9 @@ func Init(host, user, password, dbName string) *gorm.DB {
 			return
 		}
 
-		const (
-			port    = "5432"
-			sslMode = "disable"
-		)
-
 		dsn := fmt.Sprintf(
-			"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-			host, user, password, dbName, port, sslMode,
+			"host=%s user=%s password=%s dbname=%s port=5432 sslmode=disable",
+			host, user, password, dbName,
 		)
 
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

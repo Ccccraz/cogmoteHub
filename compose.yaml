@@ -5,8 +5,6 @@ services:
         condition: service_healthy
     secrets:
       - db-password
-    env_file:
-      - .env
     environment:
       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
     build:
@@ -26,14 +24,14 @@ services:
       - db-password
     volumes:
       - cogmote:/var/lib/postgresql/data
-    env_file:
-      - .env
     environment:
       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
     expose:
       - 5432
+    ports:
+      - 5432:5432
     healthcheck:
-      test: [ "CMD", "pg_isready", "-d", "${POSTGRES_USER}", "-U", "${POSTGRES_USER}" ]
+      test: [ "CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
       interval: 10s
       timeout: 5s
       retries: 5
