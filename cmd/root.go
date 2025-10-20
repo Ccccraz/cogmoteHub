@@ -5,11 +5,13 @@ package cmd
 
 import (
 	"cogmoteHub/internal/db"
+	"cogmoteHub/internal/devices"
 	"cogmoteHub/internal/logger"
 	"log/slog"
 	"os"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 )
 
@@ -67,6 +69,15 @@ func Serve() {
 	}
 
 	db.Init(host, user, password, dbName)
+
+	r := gin.Default()
+	r.UseH2C = true
+
+	api := r.Group("/api")
+
+	devices.RegisterRoutes(api)
+
+	r.Run(":9013")
 }
 
 func loadSecret(envKey, fileKey string) string {
