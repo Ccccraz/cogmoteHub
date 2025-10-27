@@ -8,7 +8,7 @@ import (
 )
 
 type Base struct {
-	ID        uuid.UUID `gorm:"primarykey"`
+	ID        uuid.UUID `gorm:"type:uuid;default:uuidv7();primarykey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`

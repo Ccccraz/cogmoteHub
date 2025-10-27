@@ -4,6 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"cogmoteHub/internal/app/users"
 	"cogmoteHub/internal/db"
 	"cogmoteHub/internal/devices"
 	"cogmoteHub/internal/logger"
@@ -76,6 +77,7 @@ func Serve() {
 	api := r.Group("/api")
 
 	devices.RegisterRoutes(api)
+	users.Register(api, db.Get())
 
 	r.Run(":9013")
 }
