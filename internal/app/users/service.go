@@ -1,11 +1,11 @@
 package users
 
 import (
+	"cogmoteHub/internal/encrypt"
 	"cogmoteHub/internal/models"
 	"errors"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
@@ -29,7 +29,7 @@ func (s *service) Register(req RegisterRequest) (*UserResponse, error) {
 		return nil, errors.New("email already exists")
 	}
 
-	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	hashed, err := encrypt.EncryptPassword(req.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -37,14 +37,18 @@ func (s *service) Register(req RegisterRequest) (*UserResponse, error) {
 	user := &models.User{
 		Username:     req.Username,
 		Email:        req.Email,
-		PasswordHash: string(hashed),
+		PasswordHash: hashed,
 	}
 	if err := s.repo.Create(user); err != nil {
 		return nil, err
 	}
 
-	var ras UserResponse
-	return &ras, nil
+	return &UserResponse{
+		ID:       user.ID,
+		UID:      user.UID,
+		Username: user.Username,
+		Email:    user.Email,
+	}, nil
 }
 
 func (s *service) GetAll() ([]UserResponse, error) {
@@ -56,7 +60,8 @@ func (s *service) GetAll() ([]UserResponse, error) {
 
 	for _, user := range users {
 		ras = append(ras, UserResponse{
-			ID:       uint(user.UID),
+			ID:       user.ID,
+			UID:      user.UID,
 			Username: user.Username,
 			Email:    user.Email,
 		})
@@ -72,7 +77,8 @@ func (s *service) GetByID(id uuid.UUID) (*UserResponse, error) {
 	}
 
 	return &UserResponse{
-		ID:       uint(user.UID),
+		ID:       user.ID,
+		UID:      user.UID,
 		Username: user.Username,
 		Email:    user.Email,
 	}, nil
@@ -85,7 +91,8 @@ func (s *service) GetByUID(uid uint64) (*UserResponse, error) {
 	}
 
 	return &UserResponse{
-		ID:       uint(user.UID),
+		ID:       user.ID,
+		UID:      user.UID,
 		Username: user.Username,
 		Email:    user.Email,
 	}, nil
@@ -98,7 +105,8 @@ func (s *service) GetByEmail(email string) (*UserResponse, error) {
 	}
 
 	return &UserResponse{
-		ID:       uint(user.UID),
+		ID:       user.ID,
+		UID:      user.UID,
 		Username: user.Username,
 		Email:    user.Email,
 	}, nil

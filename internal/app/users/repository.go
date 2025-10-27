@@ -2,6 +2,7 @@ package users
 
 import (
 	"cogmoteHub/internal/models"
+	"context"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -28,33 +29,45 @@ func (r *repo) Create(user *models.User) error {
 }
 
 func (r *repo) GetByID(id uuid.UUID) (*models.User, error) {
-	var u models.User
-	if err := r.db.First(&u, id).Error; err != nil {
+	ctx := context.Background()
+
+	user, err := gorm.G[models.User](r.db).Where("id = ?", id).First(ctx)
+	if err != nil {
 		return nil, err
 	}
-	return &u, nil
+
+	return &user, nil
 }
 
 func (r *repo) GetByUID(uid uint64) (*models.User, error) {
-	var u models.User
-	if err := r.db.First(&u, uid).Error; err != nil {
+	ctx := context.Background()
+
+	user, err := gorm.G[models.User](r.db).Where("uid = ?", uid).First(ctx)
+	if err != nil {
 		return nil, err
 	}
-	return &u, nil
+
+	return &user, nil
 }
 
 func (r *repo) GetByEmail(email string) (*models.User, error) {
-	var u models.User
-	if err := r.db.Where("email = ?", email).First(&u).Error; err != nil {
+	ctx := context.Background()
+
+	user, err := gorm.G[models.User](r.db).Where("email = ?", email).First(ctx)
+	if err != nil {
 		return nil, err
 	}
-	return &u, nil
+
+	return &user, nil
 }
 
 func (r *repo) List() ([]models.User, error) {
-	var users []models.User
-	if err := r.db.Find(&users).Error; err != nil {
+	ctx := context.Background()
+
+	users, err := gorm.G[models.User](r.db).Find(ctx)
+	if err != nil {
 		return nil, err
 	}
+
 	return users, nil
 }
