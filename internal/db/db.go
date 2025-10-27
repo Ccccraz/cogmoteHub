@@ -36,6 +36,7 @@ func Init(host, user, password, dbName string) *gorm.DB {
 		err = db.AutoMigrate(
 			&models.Device{},
 			&models.Animal{},
+			&models.User{},
 		)
 		if err != nil {
 			slog.Error("failed to auto-migrate database", "error", err)

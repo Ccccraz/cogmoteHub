@@ -1,11 +1,14 @@
 services:
-  server:
+  cogmotehub:
     depends_on:
       db:
         condition: service_healthy
     secrets:
       - db-password
     environment:
+      - POSTGRES_SERVER=db
+      - POSTGRES_USER=${POSTGRES_DB}
+      - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
     build:
       context: .
@@ -25,6 +28,8 @@ services:
     volumes:
       - cogmote:/var/lib/postgresql/data
     environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
     expose:
       - 5432
