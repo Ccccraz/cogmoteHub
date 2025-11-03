@@ -6,4 +6,5 @@ type User struct {
 	Username     string `gorm:"not null;unique"` // Username
 	Email        string `gorm:"uniqueIndex"`     // Email
 	PasswordHash string `gorm:"not null"`        // Password hash
+	RefreshToken []RefreshToken
 }
