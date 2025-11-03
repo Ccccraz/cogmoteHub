@@ -1,4 +1,4 @@
-db/password.txt
+secrets/
 .env
 .vscode
 # Created by https://www.toptal.com/developers/gitignore/api/go,macos,linux,windows,visualstudiocode
