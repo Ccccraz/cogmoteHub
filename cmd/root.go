@@ -4,13 +4,16 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"cogmoteHub/internal/app/login"
 	"cogmoteHub/internal/app/users"
+	"cogmoteHub/internal/authenticator"
 	"cogmoteHub/internal/db"
 	"cogmoteHub/internal/devices"
 	"cogmoteHub/internal/logger"
 	"log/slog"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -75,11 +78,47 @@ func Serve() {
 	r.UseH2C = true
 
 	api := r.Group("/api")
+	jwt_private_key, jwt_public_key := loadJWTKey()
+
+	jwtAuthenticator, err := authenticator.New(jwt_private_key, jwt_public_key, time.Hour, time.Hour, "cogmoteHub")
+	if err != nil {
+		slog.Error("unable to create jwt authenticator", "error", err)
+		panic(err)
+	}
 
 	devices.RegisterRoutes(api)
+	login.Register(api, db.Get(), jwtAuthenticator)
+
+	api.Use(jwtAuthenticator.Middleware())
 	users.Register(api, db.Get())
 
 	r.Run(":9013")
+}
+
+func loadJWTKey() ([]byte, []byte) {
+	privKeyPath := os.Getenv("JWT_PRIVATE_KEY")
+	if privKeyPath == "" {
+		return nil, nil
+	}
+
+	pubKeyPath := os.Getenv("JWT_PUBLIC_KEY")
+	if pubKeyPath == "" {
+		return nil, nil
+	}
+
+	privData, err := os.ReadFile(privKeyPath)
+	if err != nil {
+		slog.Error("unable to read private key file", "error", err, "path", privKeyPath)
+		return nil, nil
+	}
+
+	pubData, err := os.ReadFile(pubKeyPath)
+	if err != nil {
+		slog.Error("unable to read public key file", "error", err, "path", pubKeyPath)
+		return nil, nil
+	}
+
+	return privData, pubData
 }
 
 func loadSecret(envKey, fileKey string) string {

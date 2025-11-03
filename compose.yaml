@@ -5,11 +5,15 @@ services:
         condition: service_healthy
     secrets:
       - db-password
+      - jwt-private-key
+      - jwt-public-key
     environment:
       - POSTGRES_SERVER=db
       - POSTGRES_USER=${POSTGRES_DB}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+      - JWT_PUBLIC_KEY=/run/secrets/jwt-public-key
+      - JWT_PRIVATE_KEY=/run/secrets/jwt-private-key
     build:
       context: .
       target: final
@@ -42,6 +46,12 @@ services:
       retries: 5
 volumes:
   cogmote:
+
+
 secrets:
+  jwt-private-key:
+    file: secrets/jwt-private-key.pem
+  jwt-public-key:
+    file: secrets/jwt-public-key.pem
   db-password:
-    file: db/password.txt
+    file: secrets/password.txt
